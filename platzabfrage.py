@@ -1,10 +1,30 @@
 from os import listdir
+from pathlib import Path    
 import glob
+import pandas as pd
+import locale
+
+###### Sortieren von Strings mit Umlauten
+locale.setlocale(locale.LC_COLLATE, "de_AT.UTF-8")
 
 #Liste der Anmeldungen
 #Bewertungstabelle
 #Latex-Datei
 #HS-Liste
+
+
+def _import_csv(file, delimiter=','):
+    df = pd.read_csv(file, sep=delimiter)
+    return df
+
+def _sort_per_name(df, german_locale=True):
+    if german_locale:
+        df = df.sort_values(by='Vollständiger Name', inplace=True, key=lambda s: s.map(locale.strxfrm))
+    else:    
+        df = df.sort_values(by='Vollständiger Name')
+    return df
+
+'''
 print('start')
 # csv-trennzeichen
 trennzeichen = ','
@@ -13,6 +33,7 @@ arr = [f for f in glob.glob("*.csv")]
 for file in arr:
     print(file)
 file = ''
+
 
 source = open('anmeldungen.csv','r')
 text = source.read()
@@ -91,3 +112,13 @@ for hoersaal in hsliste:
          
 file.close()
 print(n,' Sitzplätze vergeben')
+'''
+
+if __name__ == '__main__':
+    file = input('Name of csv file [test_table.csv]: ')
+    if file:
+        df = _import_csv(Path(__file__).parent / file)
+    else:
+        df = _import_csv(Path(__file__).parent.parent / 'tests' / 'test_table.csv')
+    _sort_per_name(df)
+    print(df.head())
